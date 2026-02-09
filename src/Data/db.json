@@ -1,0 +1,90 @@
+{
+  "womenProducts": [
+    { "id": 1, "name": "Floral Summer Frock", "price": "$45.99", "image": "blue-floral-summer-dress-s5y1nbbxal3rvsou.png" },
+    { "id": 2, "name": "Denim A-Line Skirt", "price": "$39.99", "image": "Demin a-line skirtjpg.jpg" },
+    { "id": 3, "name": "Lace Trim Crop Top", "price": "$22.50", "image": "Lase trim-crop topx.jpg" },
+    { "id": 4, "name": "Velvet Bodycon Dress", "price": "$55.00", "image": "velvet bodycon.jpg" },
+    { "id": 5, "name": "Classic Cotton T-Shirt", "price": "$18.99", "image": "womens_tshirt_olive_1.jpg" },
+    { "id": 6, "name": "Linen Utility Jumpsuit", "price": "$65.00", "image": "utility jumoshuit.avif" },
+    { "id": 7, "name": "Pleated Midi Skirt", "price": "$49.99", "image": "pletedSkirt.jpg" },
+    { "id": 8, "name": "Ruffled Sundress", "price": "$48.00", "image": "ruffled.jpg" },
+    { "id": 9, "name": "Graphic Print T-Shirt", "price": "$25.00", "image": "printed-t-shirt.jpg" },
+    { "id": 10, "name": "Satin Cami Top", "price": "$28.50", "image": "satin cami-top.jpg" },
+    { "id": 11, "name": "Ribbed Knit Bodycon", "price": "$52.99", "image": "bodycon2.jpg" },
+    { "id": 12, "name": "Wide-Leg Jumpsuit", "price": "$70.00", "image": "jumpshuit2.jpg" }
+  ],
+  "menProducts": [
+    { "id": 13, "name": "Slim Fit Denim Jeans", "price": "$59.99", "image": "Slim Fit Denim Jeans.jpg" },
+    { "id": 14, "name": "Classic Oxford Shirt", "price": "$45.00", "image": "Oxford-Shirt-Dark-Blue.jpg" },
+    { "id": 15, "name": "Essential Crewneck T-Shirt", "price": "$19.50", "image": "Essential Crewneck T-Shirt.jpg" },
+    { "id": 16, "name": "Lightweight Puffer Vest", "price": "$68.00", "image": "Lightweight Puffer Vest.jpeg" },
+    { "id": 17, "name": "Chino Trousers (Khaki)", "price": "$49.99", "image": "Chino Trousers (Khaki)png.png" },
+    { "id": 18, "name": "Printed Cuban Collar Shirt", "price": "$38.00", "image": "Printed Cuban Collar Shirt.jpg" },
+    { "id": 19, "name": "Hooded Zip-Up Sweatshirt", "price": "$54.99", "image": "Hooded Zip-Up Sweatshirt.jpg" },
+    { "id": 20, "name": "Athletic Jogger Pants", "price": "$42.50", "image": "Athletic Jogger Pants.jpg" },
+    { "id": 21, "name": "Leather Belt (Black)", "price": "$29.00", "image": "Leather Belt.jpg" },
+    { "id": 22, "name": "Wool Blend Peacoat", "price": "$120.00", "image": "Wool Blend Peacoat.jpg" }
+  ],
+  "kidsProducts": [
+    {
+      "id": 23,
+      "name": "Shirt with Coat",
+      "price": "$24.99",
+      "image": "b2k.jpg"
+    },
+    {
+      "id": 24,
+      "name": "Baby Dress",
+      "price": "$18.50",
+      "image": "bbk2.jpg"
+    },
+    {
+      "id": 25,
+      "name": "Royal Blue Frock",
+      "price": "$22.00",
+      "image": "frockk.jpg"
+    },
+    {
+      "id": 26,
+      "name": "Purple Skirt",
+      "price": "$14.99",
+      "image": "purpleskirt.jpg"
+    },
+    {
+      "id": 27,
+      "name": "Orange Boys Shorts",
+      "price": "$12.00",
+      "image": "shorts.jpg"
+    },
+    {
+      "id": 28,
+      "name": "Pink Bow Skirt",
+      "price": "$16.50",
+      "image": "skirtk.jpg"
+    },
+    {
+      "id": 29,
+      "name": "Boys T-Shirt",
+      "price": "$10.00",
+      "image": "t-kid.jpg"
+    },
+    {
+      "id": 30,
+      "name": "Pretty Pink T-Shirt",
+      "price": "$11.00",
+      "image": "tgk.jpg"
+    },
+    {
+      "id": 31,
+      "name": "Ruffled Top",
+      "price": "$13.00",
+      "image": "tp2k.jpg"
+    },
+    {
+      "id": 32,
+      "name": "Collar T-Shirt",
+      "price": "$12.50",
+      "image": "tshirt2k.jpg"
+    }
+  ]
+}
