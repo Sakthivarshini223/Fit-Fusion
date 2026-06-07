@@ -1,22 +1,45 @@
-
-import React,  { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 
 const SignUpPage = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
-    const handleSignUp = (e) => {
+    const handleSignUp = async (e) => {
         e.preventDefault();
-       
-        if (email && password) {
-            console.log("New user registered:", { email, password });
-            alert("Registration successful! Please log in.");
-            navigate('/login');
-        } else {
+        setError('');
+        
+        if (!email || !password) {
             setError('Please fill in all fields.');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const response = await fetch('http://localhost:5000/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+            
+            if (response.ok) {
+                alert("Registration successful! Please log in.");
+                const from = location.state?.from || '/';
+                navigate('/login', { state: { from } });
+            } else {
+                setError(data.error || 'Registration failed');
+            }
+        } catch (err) {
+            console.error(err);
+            setError('Server error. Please try again later.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -30,12 +53,7 @@ const SignUpPage = () => {
                 .brand-gradient { background: linear-gradient(to right, #ec4899, #8b5cf6); }
                 .btn-custom { background: linear-gradient(to right, #ec4899, #8b5cf6); color: white; border: none; }
                 .btn-custom:hover { color: white; opacity: 0.9; }
-                .signup-container {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    min-height: 100vh;
-                }
+                .signup-container { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
             `}</style>
             
             <div className="signup-container">
@@ -71,7 +89,9 @@ const SignUpPage = () => {
                                 </div>
                                 {error && <p className="text-danger small">{error}</p>}
                                 <div className="d-grid mt-4">
-                                    <button type="submit" className="btn btn-custom py-2">Sign Up</button>
+                                    <button type="submit" className="btn btn-custom py-2" disabled={loading}>
+                                        {loading ? 'Processing...' : 'Sign Up'}
+                                    </button>
                                 </div>
                             </form>
                             <div className="text-center mt-3">

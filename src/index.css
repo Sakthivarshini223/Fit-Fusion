@@ -1,79 +1,76 @@
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --brand-pink: #ec4899;
+  --brand-purple: #8b5cf6;
 }
 
-
-html, body, #root {
-  height: 100%;
-  width: 100%;
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #f8f9fa;
   margin: 0;
   padding: 0;
 }
 
-
-body {
-  min-width: 320px; 
+.font-lobster {
+  font-family: 'Lobster', cursive;
 }
 
-
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+.brand-gradient {
+  background: linear-gradient(to right, var(--brand-pink), var(--brand-purple));
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+.btn-custom {
+  background: linear-gradient(to right, var(--brand-pink), var(--brand-purple));
+  color: white;
+  border: none;
+  transition: all 0.2s ease-in-out;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+.btn-custom:hover {
+  color: white;
+  opacity: 0.9;
+  transform: translateY(-2px);
 }
 
-.header-gradient {
-  background: linear-gradient(to right, #a855f7, #ec4899); 
+.btn-buy {
+  background-color: var(--brand-purple);
+  color: white;
+  border-color: var(--brand-purple);
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+.btn-buy:hover {
+  background-color: #7c3aed;
+  border-color: #7c3aed;
+  color: white;
+}
+
+.btn-trial {
+  background-color: transparent;
+  color: var(--brand-pink);
+  border-color: var(--brand-pink);
+}
+
+.btn-trial:hover {
+  background-color: var(--brand-pink);
+  color: white;
+}
+
+.product-card {
+  transition: transform 0.2s ease-in-out;
+  display: flex;
+  flex-direction: column;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+}
+
+.cart-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  padding: 5px 8px;
+  border-radius: 50%;
+  background-color: red;
+  color: white;
+  font-size: 0.75rem;
 }

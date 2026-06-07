@@ -1,18 +1,49 @@
-
-
-import React from 'react';
+import React, { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { CartContext } from '../App';
 
 const PaymentPage = () => {
     const navigate = useNavigate();
+    const { cartItems, setCartItems } = useContext(CartContext);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
 
-    const handlePayment = (e) => {
+    const handlePayment = async (e) => {
         e.preventDefault();
-  
-        console.log("Processing payment...");
-        alert("Payment successful! Thank you for your order.");
-       
-        navigate('/'); 
+        setError('');
+
+        if (cartItems.length === 0) {
+            setError('Your cart is empty.');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            const totalPrice = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+
+            const res = await fetch('http://localhost:5000/api/orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ cartItems, totalPrice })
+            });
+
+            if (res.ok) {
+                alert("Payment successful! Thank you for your order.");
+                setCartItems([]); // Empty the cart
+                navigate('/');
+            } else {
+                setError('Failed to process the order.');
+            }
+        } catch (err) {
+            console.error(err);
+            setError('Server error during payment.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -26,11 +57,11 @@ const PaymentPage = () => {
                 .btn-custom { background: linear-gradient(to right, #ec4899, #8b5cf6); color: white; border: none; }
                 .btn-custom:hover { color: white; opacity: 0.9; }
             `}</style>
-            
+
             <div className="bg-light min-vh-100">
                 <nav className="navbar navbar-dark brand-gradient shadow-sm py-2">
                     <div className="container">
-                        <a className="navbar-brand fs-2 font-lobster" onClick={() => navigate('/')}>FitFusion</a>
+                        <a className="navbar-brand fs-2 font-lobster" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>FitFusion</a>
                     </div>
                 </nav>
 
@@ -48,7 +79,7 @@ const PaymentPage = () => {
                                         <div className="mb-3">
                                             <label htmlFor="cardNumber" className="form-label">Card Number</label>
                                             <input type="text" className="form-control" id="cardNumber" placeholder="1111-2222-3333-4444" required />
-                                        </div>
+                                        </div >
                                         <div className="row">
                                             <div className="col-md-6 mb-3">
                                                 <label htmlFor="expiryDate" className="form-label">Expiry Date</label>
@@ -59,16 +90,19 @@ const PaymentPage = () => {
                                                 <input type="text" className="form-control" id="cvv" placeholder="123" required />
                                             </div>
                                         </div>
+                                        {error && <p className="text-danger small">{error}</p>}
                                         <div className="d-grid mt-4">
-                                            <button type="submit" className="btn btn-custom py-2">Pay Now</button>
+                                            <button type="submit" className="btn btn-custom py-2" disabled={loading}>
+                                                {loading ? 'Processing...' : 'Pay Now'}
+                                            </button>
                                         </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </main>
-            </div>
+                                    </form >
+                                </div >
+                            </div >
+                        </div >
+                    </div >
+                </main >
+            </div >
         </>
     );
 };

@@ -1,21 +1,6 @@
-import React, { useState, useContext } from 'react'; 
-import { useNavigate } from 'react-router-dom';
-import { CartContext } from '../App'; 
-
-
-const menProducts = [
-    { "id": 13, "name": "Slim Fit Denim Jeans", "price": "$59.99", "image": "Slim Fit Denim Jeans.jpg" },
-    { "id": 14, "name": "Classic Oxford Shirt", "price": "$45.00", "image": "Oxford-Shirt-Dark-Blue.jpg" },
-    { "id": 15, "name": "Essential Crewneck T-Shirt", "price": "$19.50", "image": "Essential Crewneck T-Shirt.jpg" },
-    { "id": 16, "name": "Lightweight Puffer Vest", "price": "$68.00", "image": "Lightweight Puffer Vest.jpeg" },
-    { "id": 17, "name": "Chino Trousers (Khaki)", "price": "$49.99", "image": "Chino Trousers (Khaki)png.png" },
-    { "id": 18, "name": "Printed Cuban Collar Shirt", "price": "$38.00", "image": "Printed Cuban Collar Shirt.jpg" },
-    { "id": 19, "name": "Hooded Zip-Up Sweatshirt", "price": "$54.99", "image": "Hooded Zip-Up Sweatshirt .jpg" },
-    { "id": 20, "name": "Athletic Jogger Pants", "price": "$42.50", "image": "Athletic Jogger Pants.jpg" },
-    { "id": 21, "name": "Leather Belt (Black)", "price": "$29.00", "image": "Leather Belt.jpg" },
-    { "id": 22, "name": "Wool Blend Peacoat", "price": "$120.00", "image": "Wool Blend Peacoat.jpg" }
-];
-
+import React, { useState, useEffect, useContext } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { CartContext, AuthContext } from '../App'; 
 
 const SearchIcon = ({ className }) => (
     <svg className={className} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
@@ -30,69 +15,71 @@ const ShoppingCartIcon = ({ className }) => (
 
 const Men = () => {
     const [query, setQuery] = useState("");
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
-    
-   
-    const { cartItems, addToCart } = useContext(CartContext);
-  
+    const location = useLocation();
+    const { cartItems, addToCart, setCartItems } = useContext(CartContext);
+    const { isAuthenticated, logout } = useContext(AuthContext);
+
+    useEffect(() => {
+        fetchProducts();
+    }, []);
+
+    const fetchProducts = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch('http://localhost:5000/api/products?category=men');
+            const data = await response.json();
+            setProducts(data);
+        } catch (error) {
+            console.error('Failed to fetch products:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const getImageUrl = (imageName) => {
-       
-        return `Mens-image/${imageName}`;
+        if (imageName && imageName.startsWith('http')) return imageName;
+        return `/Mens-image/${imageName}`;
     };
 
-    const handleSearch = (e) => {
+    const handleSearch = async (e) => {
         e.preventDefault();
-        console.log("Searching for:", query);
+        if (!query.trim()) {
+            fetchProducts();
+            return;
+        }
+        try {
+            setLoading(true);
+            const response = await fetch(`http://localhost:5000/api/products/search?q=${query}`);
+            let data = await response.json();
+            data = data.filter(p => p.category === 'men');
+            setProducts(data);
+        } catch (error) {
+            console.error('Failed to search products:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleBrandClick = () => {
-        navigate('/');
-    };
-
+    const handleBrandClick = () => navigate('/');
+    
     const handleBuyNow = (product) => {
-        console.log(`Buying ${product.name} now.`);
+        if (!isAuthenticated) {
+            navigate('/login', { state: { from: location.pathname } });
+            return;
+        }
+        let cleanPrice = typeof product.price === 'string' ? Number(product.price.replace(/[^0-9.-]+/g, "")) : product.price;
+        setCartItems([{ ...product, price: cleanPrice, quantity: 1 }]);
+        navigate('/address');
     };
-
-    const handleTrial = (product) => {
-          
-          navigate(`/try-on/men/${product.id}`); 
-    };
-
+    
+    const handleTrial = (product) => navigate(`/try-on/men/${product.id}`);
     const cartItemCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
     return (
         <>
-            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-            
-            <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Lobster&display=swap');
-                body { font-family: 'Poppins', sans-serif; background-color: #f8f9fa; }
-                .font-lobster { font-family: 'Lobster', cursive; }
-                .brand-gradient { background: linear-gradient(to right, #1f2937, #3b82f6); } 
-                .product-card { transition: transform 0.2s ease-in-out; display: flex; flex-direction: column; }
-                .product-card:hover { transform: translateY(-5px); }
-                .navbar-brand { cursor: pointer; }
-                .card-body { flex-grow: 1; }
-                .btn { transition: all 0.2s ease-in-out; }
-                .btn-custom { background: linear-gradient(to right, #1f2937, #3b82f6); color: white; border: none; } 
-                .btn-custom:hover { color: white; opacity: 0.9; }
-                .btn-buy { background-color: #3b82f6; color: white; border-color: #3b82f6; } 
-                .btn-buy:hover { background-color: #2563eb; border-color: #2563eb; color: white; }
-                .btn-trial { background-color: transparent; color: #1f2937; border-color: #1f2937; } 
-                .btn-trial:hover { background-color: #1f2937; color: white; }
-                .cart-badge {
-                    position: absolute;
-                    top: -5px;
-                    right: -5px;
-                    padding: 5px 8px;
-                    border-radius: 50%;
-                    background-color: red;
-                    color: white;
-                    font-size: 0.75rem;
-                }
-            `}</style>
-
             <div className="bg-light min-vh-100">
                 <nav className="navbar navbar-expand-lg navbar-dark brand-gradient shadow-sm py-2 sticky-top">
                     <div className="container">
@@ -113,7 +100,11 @@ const Men = () => {
                             </form>
                             <ul className="navbar-nav ms-auto align-items-center">
                                 <li className="nav-item">
-                                    <button className="btn btn-outline-light me-2">Login</button>
+                                    {isAuthenticated ? (
+                                        <button className="btn btn-outline-light me-2" onClick={() => logout()}>Logout</button>
+                                    ) : (
+                                        <button className="btn btn-outline-light me-2" onClick={() => navigate('/login')}>Login</button>
+                                    )}
                                 </li>
                                 <li className="nav-item">
                                     <button className="btn btn-light d-flex align-items-center position-relative" onClick={() => navigate('/cart')}>
@@ -132,7 +123,9 @@ const Men = () => {
                     <section>
                         <h1 className="mb-4 text-center">Men's Collection</h1>
                         <div className="row row-cols-2 row-cols-md-4 g-4">
-                            {menProducts.map((product) => (
+                            {loading && <div className="text-center w-100 py-5"><p>Loading products...</p></div>}
+                            {!loading && products.length === 0 && <div className="text-center w-100 py-5"><p>No products found.</p></div>}
+                            {!loading && products.map((product) => (
                                 <div className="col" key={product.id}>
                                     <div className="card h-100 shadow-sm border-0 product-card">
                                         <img src={getImageUrl(product.image)} className="card-img-top" alt={product.name} 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom"; 
+import { useParams, useNavigate } from "react-router-dom";
 import data from "../data/db.json";
 import { client } from "@gradio/client";
 
@@ -21,20 +21,20 @@ const TryOnPage = () => {
       case "women":
         productList = data.womenProducts;
         break;
-        case "mens":
-          productList=data.menProducts;
-          break;
+      case "men":
+        productList = data.menProducts;
+        break;
       case "kids":
         productList = data.kidsProducts;
         break;
-      
+
       default:
         setError("Invalid product category.");
-        navigate("/"); 
+        navigate("/");
         return;
     }
 
-   
+
     const foundProduct = productList.find(
       (p) => p.id === parseInt(productId)
     );
@@ -43,22 +43,22 @@ const TryOnPage = () => {
       setProduct(foundProduct);
     } else {
       setError("Product not found.");
-     
+
       navigate(`/${category}`);
     }
-  
+
   }, [category, productId, navigate]);
 
- 
+
   const getImageUrl = (imageName) => {
-    if (!category) return ""; 
-  
+    if (!category) return "";
+
     const folderName = `${category.charAt(0).toUpperCase() + category.slice(1)}-image`;
     return `/${folderName}/${imageName}`;
   };
 
   const handleUserPhotoUpload = (event) => {
-  
+
     const file = event.target.files[0];
     if (file) {
       setUserPhotoFile(file);
@@ -72,7 +72,7 @@ const TryOnPage = () => {
   };
 
   const handleTryOn = async () => {
-    
+
     if (!userPhotoFile) {
       setError("Please upload your photo first.");
       return;
@@ -83,7 +83,7 @@ const TryOnPage = () => {
     setCombinedImage(null);
 
     try {
-      const productImageUrl = getImageUrl(product.image); 
+      const productImageUrl = getImageUrl(product.image);
       const productResponse = await fetch(productImageUrl);
       if (!productResponse.ok) {
         throw new Error(`Could not fetch product image from ${productImageUrl}.`);
@@ -116,7 +116,7 @@ const TryOnPage = () => {
     }
   };
 
-  
+
 
   if (error && !product) {
     return <div className="container mt-5 alert alert-danger">{error}</div>;

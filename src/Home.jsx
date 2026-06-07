@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from './App';
 
 // Local Images
 import mensImg from "./Card-images/Men.jpg";
@@ -27,10 +28,10 @@ const ShoppingCartIcon = ({ className }) => (
 
 // Categories (UPDATED HERE) 
 const categories = [
-  { name: "Mens", imageUrl: mensImg, path: "/mens" }, 
+  { name: "Mens", imageUrl: mensImg, path: "/mens" },
   { name: "Womens", imageUrl: womenImg, path: "/womens" },
-  { name: "Kids", imageUrl: kidsImg, path: "/kids" }, 
-  { name: "Accessories", imageUrl: accessoriesImg }, 
+  { name: "Kids", imageUrl: kidsImg, path: "/kids" },
+  { name: "Accessories", imageUrl: accessoriesImg },
 ];
 
 // --- Products ---
@@ -44,6 +45,7 @@ const products = [
 const Home = () => {
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
+  const { isAuthenticated, logout } = useContext(AuthContext);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -54,7 +56,7 @@ const Home = () => {
     // This logic now works for Mens, Womens, and Kids
     if (cat.path) navigate(cat.path);
   };
-  
+
   // Also, update the cart button to navigate
   const handleCartClick = () => {
     navigate('/cart');
@@ -93,7 +95,11 @@ const Home = () => {
               </form>
               <ul className="navbar-nav ms-auto align-items-center">
                 <li className="nav-item">
-                  <button className="btn btn-outline-light me-2">Login</button>
+                  {isAuthenticated ? (
+                    <button className="btn btn-outline-light me-2" onClick={() => logout()}>Logout</button>
+                  ) : (
+                    <button className="btn btn-outline-light me-2" onClick={() => navigate('/login')}>Login</button>
+                  )}
                 </li>
                 <li className="nav-item">
                   <button className="btn btn-light d-flex align-items-center" onClick={handleCartClick}> {/* ✅ --- ADDED CLICK HANDLER --- */}

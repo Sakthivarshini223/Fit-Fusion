@@ -1,9 +1,7 @@
-import React, { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
-import data from '../data/db.json';
-import { CartContext } from '../App'; // Import the context from App.jsx
+import React, { useState, useEffect, useContext } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { CartContext, AuthContext } from '../App';
 
-// --- Helper Icons (unchanged) ---
 const SearchIcon = ({ className }) => (
     <svg className={className} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
         <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
@@ -14,7 +12,6 @@ const ShoppingCartIcon = ({ className }) => (
         <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
     </svg>
 );
-// Icon for the "Added to Cart" button
 const CheckIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-check-lg" viewBox="0 0 16 16" style={{ marginRight: '4px' }}>
       <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/>
@@ -23,85 +20,71 @@ const CheckIcon = () => (
 
 const Kids = () => {
     const [query, setQuery] = useState("");
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
-    // 1. Get the functions and state from the CartContext
-    const { cartItems, addToCart } = useContext(CartContext);
+    const location = useLocation();
+    const { cartItems, addToCart, setCartItems } = useContext(CartContext);
+    const { isAuthenticated, logout } = useContext(AuthContext);
 
-    // ✅ --- UPDATED image path function ---
+    useEffect(() => {
+        fetchProducts();
+    }, []);
+
+    const fetchProducts = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch('http://localhost:5000/api/products?category=kids');
+            const data = await response.json();
+            setProducts(data);
+        } catch (error) {
+            console.error('Failed to fetch products:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const getImageUrl = (imageName) => {
-        // This assumes 'Kids-image' is in your 'public' folder
+        if (imageName && imageName.startsWith('http')) return imageName;
         return `/Kids-image/${imageName}`;
     };
 
-    const handleSearch = (e) => {
+    const handleSearch = async (e) => {
         e.preventDefault();
-        console.log("Searching for:", query);
+        if (!query.trim()) {
+            fetchProducts();
+            return;
+        }
+        try {
+            setLoading(true);
+            const response = await fetch(`http://localhost:5000/api/products/search?q=${query}`);
+            let data = await response.json();
+            data = data.filter(p => p.category === 'kids');
+            setProducts(data);
+        } catch (error) {
+            console.error('Failed to search products:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleBrandClick = () => {
-        navigate('/');
-    };
-
+    const handleBrandClick = () => navigate('/');
+    
     const handleBuyNow = (product) => {
-        console.log(`Buying ${product.name} now.`);
+        if (!isAuthenticated) {
+            navigate('/login', { state: { from: location.pathname } });
+            return;
+        }
+        let cleanPrice = typeof product.price === 'string' ? Number(product.price.replace(/[^0-9.-]+/g, "")) : product.price;
+        setCartItems([{ ...product, price: cleanPrice, quantity: 1 }]);
+        navigate('/address');
     };
-
-
-    const handleTrial = (product) => {
-       
-        navigate(`/try-on/kids/${product.id}`);
-    };
-
- 
+    
+    const handleTrial = (product) => navigate(`/try-on/kids/${product.id}`);
     const cartItemCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
     return (
         <>
-            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-            
-            <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Lobster&display=swap');
-                body { font-family: 'Poppins', sans-serif; background-color: #f8f9fa; }
-                .font-lobster { font-family: 'Lobster', cursive; }
-                .brand-gradient { background: linear-gradient(to right, #6EE7B7, #3B82F6); }
-                .product-card { transition: transform 0.2s ease-in-out; display: flex; flex-direction: column; }
-                .product-card:hover { transform: translateY(-5px); }
-                .navbar-brand { cursor: pointer; }
-                .card-body { flex-grow: 1; }
-                .btn { transition: all 0.2s ease-in-out; }
-                .btn-custom { background: linear-gradient(to right, #6EE7B7, #3B82F6); color: white; border: none; }
-                .btn-custom:hover { color: white; opacity: 0.9; }
-                .btn-buy { background-color: #3B82F6; color: white; border-color: #3B82F6; }
-                .btn-buy:hover { background-color: #2563EB; border-color: #2563EB; color: white; }
-                .btn-trial { background-color: transparent; color: #6EE7B7; border-color: #6EE7B7; }
-                .btn-trial:hover { background-color: #6EE7B7; color: white; }
-                .cart-badge {
-                    position: absolute;
-                    top: -5px;
-                    right: -5px;
-                    padding: 5px 8px;
-                    border-radius: 50%;
-                    background-color: red;
-                    color: white;
-                    font-size: 0.75rem;
-                }
-                /* Style for the "Added" button */
-                .btn-success { 
-                    background-color: #198754; 
-                    color: white; 
-                    border-color: #198754;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-                .btn-success:disabled { 
-                    background-color: #198754; 
-                    color: white; 
-                    border-color: #198754; 
-                    opacity: 0.7; 
-                }
-            `}</style>
-
             <div className="bg-light min-vh-100">
                 <nav className="navbar navbar-expand-lg navbar-dark brand-gradient shadow-sm py-2 sticky-top">
                     <div className="container">
@@ -122,14 +105,16 @@ const Kids = () => {
                             </form>
                             <ul className="navbar-nav ms-auto align-items-center">
                                 <li className="nav-item">
-                                    <button className="btn btn-outline-light me-2">Login</button>
+                                    {isAuthenticated ? (
+                                        <button className="btn btn-outline-light me-2" onClick={() => logout()}>Logout</button>
+                                    ) : (
+                                        <button className="btn btn-outline-light me-2" onClick={() => navigate('/login')}>Login</button>
+                                    )}
                                 </li>
                                 <li className="nav-item">
                                     <button className="btn btn-light d-flex align-items-center position-relative" onClick={() => navigate('/cart')}>
                                         <ShoppingCartIcon className="me-1" /> Cart
-                                        {cartItemCount > 0 && (
-                                            <span className="cart-badge">{cartItemCount}</span>
-                                        )}
+                                        {cartItemCount > 0 && <span className="cart-badge">{cartItemCount}</span>}
                                     </button>
                                 </li>
                             </ul>
@@ -139,21 +124,18 @@ const Kids = () => {
 
                 <main className="container-fluid my-4 px-md-5">
                     <section>
-                      
                         <h1 className="mb-4 text-center">Kids' Collection</h1>
                         <div className="row row-cols-2 row-cols-md-4 g-4">
-                            
-                            {data.kidsProducts.map((product) => {
-
+                            {loading && <div className="text-center w-100 py-5"><p>Loading products...</p></div>}
+                            {!loading && products.length === 0 && <div className="text-center w-100 py-5"><p>No products found.</p></div>}
+                            {!loading && products.map((product) => {
                                 const isItemInCart = cartItems.some(item => item.id === product.id);
-
                                 return (
                                     <div className="col" key={product.id}>
                                         <div className="card h-100 shadow-sm border-0 product-card">
                                             <img src={getImageUrl(product.image)} className="card-img-top" alt={product.name} 
                                                 onError={(e) => { 
                                                     e.target.onerror = null; 
-                                                   
                                                     e.target.src = "https://placehold.co/600x600/6EE7B7/ffffff?text=Image+Missing"; 
                                                 }}
                                             />
@@ -163,7 +145,6 @@ const Kids = () => {
                                             </div>
                                             <div className="card-footer bg-transparent border-top-0 pt-2 pb-3">
                                                 <div className="d-grid gap-2">
-                                                   
                                                     {isItemInCart ? (
                                                         <button className="btn btn-success btn-sm" disabled>
                                                             <CheckIcon /> Added to Cart
@@ -173,10 +154,8 @@ const Kids = () => {
                                                             Add to Cart
                                                         </button>
                                                     )}
-
                                                     <div className="d-flex gap-2">
                                                         <button className="btn btn-buy btn-sm w-100" onClick={() => handleBuyNow(product)}>Buy Now</button>
-                                                       
                                                         <button className="btn btn-trial btn-sm w-100" onClick={() => handleTrial(product)}>Trial</button>
                                                     </div>
                                                 </div>

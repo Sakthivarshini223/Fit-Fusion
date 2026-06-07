@@ -1,38 +1,44 @@
-import React, { useState, useContext } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { AuthContext } from '../App';
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 
-const LoginPage = () => {
+const ForgotPasswordPage = () => {
     const navigate = useNavigate();
-    const location = useLocation();
-    const { login } = useContext(AuthContext);
     const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [message, setMessage] = useState('');
     const [error, setError] = useState('');
-    
-    const from = location.state?.from || '/';
+    const [loading, setLoading] = useState(false);
 
-    const handleLogin = async (e) => {
+    const handleReset = async (e) => {
         e.preventDefault();
         setError('');
-        
+        setMessage('');
+
+        if (!email || !newPassword) {
+            setError('Please fill in all fields.');
+            return;
+        }
+
+        setLoading(true);
         try {
-            const response = await fetch('http://localhost:5000/api/auth/login', {
+            const response = await fetch('http://localhost:5000/api/auth/forgot-password', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify({ email, newPassword })
             });
             const data = await response.json();
             
             if (response.ok) {
-                login(data.user, data.token); 
-                navigate(from, { replace: true }); 
+                setMessage('Password reset successful! You can now log in.');
+                setTimeout(() => navigate('/login'), 2000);
             } else {
-                setError(data.error || 'Invalid email or password');
+                setError(data.error || 'Failed to reset password');
             }
         } catch (err) {
             console.error(err);
             setError('Server error. Please try again later.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -46,18 +52,18 @@ const LoginPage = () => {
                 .brand-gradient { background: linear-gradient(to right, #ec4899, #8b5cf6); }
                 .btn-custom { background: linear-gradient(to right, #ec4899, #8b5cf6); color: white; border: none; }
                 .btn-custom:hover { color: white; opacity: 0.9; }
-                .login-container { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+                .reset-container { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
             `}</style>
             
-            <div className="login-container">
+            <div className="reset-container">
                 <div className="col-lg-4 col-md-6">
                     <div className="card shadow-sm border-0">
                         <div className="card-body p-4">
                             <div className="text-center mb-4">
                                 <h1 className="font-lobster brand-gradient" style={{WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'}}>FitFusion</h1>
-                                <p className="text-muted">Please log in to continue</p>
+                                <p className="text-muted">Reset your password</p>
                             </div>
-                            <form onSubmit={handleLogin}>
+                            <form onSubmit={handleReset}>
                                 <div className="mb-3">
                                     <label htmlFor="email" className="form-label">Email address</label>
                                     <input 
@@ -70,24 +76,26 @@ const LoginPage = () => {
                                     />
                                 </div>
                                 <div className="mb-3">
-                                    <label htmlFor="password" className="form-label">Password</label>
+                                    <label htmlFor="newPassword" className="form-label">New Password</label>
                                     <input 
                                         type="password" 
                                         className="form-control" 
-                                        id="password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
+                                        id="newPassword"
+                                        value={newPassword}
+                                        onChange={(e) => setNewPassword(e.target.value)}
                                         required 
                                     />
                                 </div>
                                 {error && <p className="text-danger small">{error}</p>}
+                                {message && <p className="text-success small">{message}</p>}
                                 <div className="d-grid mt-4">
-                                    <button type="submit" className="btn btn-custom py-2">Login</button>
+                                    <button type="submit" className="btn btn-custom py-2" disabled={loading}>
+                                        {loading ? 'Processing...' : 'Reset Password'}
+                                    </button>
                                 </div>
                             </form>
                             <div className="text-center mt-3">
-                                <p className="text-muted mb-1"><Link to="/forgot-password">Forgot password?</Link></p>
-                                <p className="text-muted mb-0">Don't have an account? <Link to="/signup">Sign Up</Link></p>
+                                <p className="text-muted mb-0">Remembered your password? <Link to="/login">Log In</Link></p>
                             </div>
                         </div>
                     </div>
@@ -97,4 +105,4 @@ const LoginPage = () => {
     );
 };
 
-export default LoginPage;
+export default ForgotPasswordPage;
